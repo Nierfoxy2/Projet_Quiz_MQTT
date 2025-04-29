@@ -1,12 +1,222 @@
 [
     {
-        "question": "Quelle est la capitale de la France ?",
-        "options": ["Paris", "Londres", "Berlin", "Rome"],
-        "answer": 0
+        "question": "Combien de cœurs possède une pieuvre ?",
+        "options": [
+            "1",
+            "2",
+            "3",
+            "4"
+        ],
+        "answer": 2,
+        "explanation": "La pieuvre a 3 cœurs : deux pour pomper le sang vers les branchies, et un pour le reste du corps."
     },
     {
-        "question": "Combien font 2 + 2 ?",
-        "options": ["3", "4", "5", "6"],
-        "answer": 1
+        "question": "Quelle est la planète la plus chaude du système solaire ?",
+        "options": [
+            "Mercure",
+            "Vénus",
+            "Mars",
+            "Jupiter"
+        ],
+        "answer": 1,
+        "explanation": "Vénus est la plus chaude en raison de son atmosphère très dense en dioxyde de carbone qui retient la chaleur."
+    },
+    {
+        "question": "Qui a peint le plafond de la chapelle Sixtine ?",
+        "options": [
+            "Michel-Ange",
+            "Léonard de Vinci",
+            "Raphaël",
+            "Donatello"
+        ],
+        "answer": 0,
+        "explanation": "Michel-Ange a peint la chapelle Sixtine entre 1508 et 1512, un chef-d'œuvre de la Renaissance."
+    },
+    {
+        "question": "Quel est le plus grand organe du corps humain ?",
+        "options": [
+            "Le foie",
+            "La peau",
+            "Le cerveau",
+            "Le cœur"
+        ],
+        "answer": 1,
+        "explanation": "La peau est le plus grand organe, elle protège le corps et régule la température."
+    },
+    {
+        "question": "Quel est l’élément chimique le plus léger ?",
+        "options": [
+            "Oxygène",
+            "Hydrogène",
+            "Hélium",
+            "Carbone"
+        ],
+        "answer": 1,
+        "explanation": "L'hydrogène est le plus léger et le plus abondant dans l'univers."
+    },
+    {
+        "question": "Qui a découvert la pénicilline ?",
+        "options": [
+            "Alexander Fleming",
+            "Marie Curie",
+            "Louis Pasteur",
+            "Gregor Mendel"
+        ],
+        "answer": 0,
+        "explanation": "Alexander Fleming a découvert la pénicilline en 1928, révolutionnant la médecine moderne."
+    },
+    {
+        "question": "Quelle est la capitale la plus haute du monde ?",
+        "options": [
+            "Quito",
+            "La Paz",
+            "Katmandou",
+            "Bogotá"
+        ],
+        "answer": 1,
+        "explanation": "La Paz (Bolivie) est perchée à plus de 3 600 m d'altitude."
+    },
+    {
+        "question": "Combien de temps met la lumière du Soleil pour atteindre la Terre ?",
+        "options": [
+            "8 secondes",
+            "8 minutes",
+            "8 heures",
+            "8 jours"
+        ],
+        "answer": 1,
+        "explanation": "La lumière du Soleil met environ 8 minutes et 20 secondes pour atteindre la Terre."
+    },
+    {
+        "question": "Quel animal peut dormir debout ?",
+        "options": [
+            "Chat",
+            "Chien",
+            "Cheval",
+            "Cochon"
+        ],
+        "answer": 2,
+        "explanation": "Les chevaux peuvent dormir debout grâce à un système de verrouillage de leurs jambes."
+    },
+    {
+        "question": "Quelle est la langue officielle du Brésil ?",
+        "options": [
+            "Espagnol",
+            "Anglais",
+            "Portugais",
+            "Français"
+        ],
+        "answer": 2,
+        "explanation": "Le portugais est la langue officielle du Brésil en raison de la colonisation portugaise."
+    },
+    {
+        "question": "Quel métal est liquide à température ambiante ?",
+        "options": [
+            "Plomb",
+            "Mercure",
+            "Fer",
+            "Aluminium"
+        ],
+        "answer": 1,
+        "explanation": "Le mercure est le seul métal liquide à température ambiante."
+    },
+    {
+        "question": "Quel est le plus grand mammifère marin ?",
+        "options": [
+            "Orque",
+            "Requin baleine",
+            "Baleine bleue",
+            "Dauphin"
+        ],
+        "answer": 2,
+        "explanation": "La baleine bleue peut mesurer jusqu’à 30 mètres et peser 170 tonnes."
+    },
+    {
+        "question": "Combien de dents possède un adulte normalement ?",
+        "options": [
+            "28",
+            "30",
+            "32",
+            "34"
+        ],
+        "answer": 2,
+        "explanation": "Un adulte a normalement 32 dents, y compris les dents de sagesse."
+    },
+    {
+        "question": "Qui a écrit 'Roméo et Juliette' ?",
+        "options": [
+            "Molière",
+            "Shakespeare",
+            "Victor Hugo",
+            "Balzac"
+        ],
+        "answer": 1,
+        "explanation": "William Shakespeare a écrit cette tragédie célèbre au XVIe siècle."
+    },
+    {
+        "question": "Quel pays est le plus peuplé du monde ?",
+        "options": [
+            "Inde",
+            "États-Unis",
+            "Indonésie",
+            "Chine"
+        ],
+        "answer": 0,
+        "explanation": "Depuis 2023, l'Inde est passée devant la Chine en population."
+    },
+    {
+        "question": "Que mesure l’échelle de Richter ?",
+        "options": [
+            "La température",
+            "La vitesse du vent",
+            "La magnitude d’un séisme",
+            "La pression"
+        ],
+        "answer": 2,
+        "explanation": "L’échelle de Richter mesure l’énergie libérée par un tremblement de terre."
+    },
+    {
+        "question": "Quel est l’animal le plus rapide sur Terre ?",
+        "options": [
+            "Guépard",
+            "Faucon pèlerin",
+            "Gazelle",
+            "Autruche"
+        ],
+        "answer": 1,
+        "explanation": "En piqué, le faucon pèlerin dépasse les 300 km/h, plus rapide que le guépard au sol."
+    },
+    {
+        "question": "Quel est le symbole chimique de l’eau ?",
+        "options": [
+            "H2O",
+            "O2",
+            "CO2",
+            "HO2"
+        ],
+        "answer": 0,
+        "explanation": "H2O signifie deux atomes d’hydrogène et un d’oxygène."
+    },
+    {
+        "question": "Quel pays a inventé les Jeux Olympiques ?",
+        "options": [
+            "Italie",
+            "Grèce",
+            "France",
+            "Égypte"
+        ],
+        "answer": 1,
+        "explanation": "Les premiers Jeux Olympiques ont eu lieu en Grèce antique, en 776 av. J.-C."
+    },
+    {
+        "question": "Combien de pattes a une araignée ?",
+        "options": [
+            "6",
+            "8",
+            "10",
+            "12"
+        ],
+        "answer": 1,
+        "explanation": "Toutes les araignées ont 8 pattes, ce qui les distingue des insectes."
     }
 ]
