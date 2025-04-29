@@ -10,7 +10,7 @@ PORT = 1883
 class ClientQuiz:
     def __init__(self, master):
         self.master = master
-        self.master.title("Client Quiz")
+        self.master.title("Client Quiz ")
         
         self.client_id = str(uuid.uuid4())[:8]
         self.nickname = ""
