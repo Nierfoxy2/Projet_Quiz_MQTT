@@ -6,7 +6,17 @@ from tkinter import ttk, messagebox
 from collections import defaultdict
 import paho.mqtt.client as mqtt
 
-# Configuration MQTT
+NORD = {
+    "bg": "#2E3440",
+    "fg": "#ECEFF4",
+    "accent": "#88C0D0",
+    "button": "#4C566A",
+    "button_active": "#5E81AC",
+    "success": "#A3BE8C",
+    "error": "#BF616A",
+    "warning": "#EBCB8B",
+    "header": "#3B4252"
+}
 BROKER = "broker.hivemq.com"
 PORT = 1883
 TOPICS = {
@@ -17,16 +27,16 @@ TOPICS = {
     "feedback": "quiz/feedback/"
 }
 
-# Chargement des questions
-with open("/Users/mac/Desktop/Projet/questions.json", "r", encoding="utf-8") as f:
+with open("questions.json", "r", encoding="utf-8") as f:
     questions = json.load(f)
 
 class CustomTreeview(ttk.Treeview):
     def __init__(self, master=None, **kwargs):
         super().__init__(master, **kwargs)
         style = ttk.Style()
-        style.configure("Treeview.Heading", font=("Arial", 12, "bold"))
-        style.configure("Treeview", rowheight=28, font=("Arial", 11))
+        style.theme_use("clam")
+        style.configure("Treeview.Heading", font=("Arial", 12, "bold"), background=NORD["header"], foreground=NORD["accent"])
+        style.configure("Treeview", rowheight=28, font=("Arial", 11), background=NORD["bg"], fieldbackground=NORD["bg"], foreground=NORD["fg"])
 
 class GestionnaireQuiz:
     def __init__(self, root):
@@ -43,43 +53,39 @@ class GestionnaireQuiz:
 
     def setup_ui(self):
         self.root.title("🎓 Gestionnaire Quiz")
-        self.root.geometry("800x600")
-        self.root.configure(bg="#f4f4f4")
+        self.root.geometry("820x600")
+        self.root.configure(bg=NORD["bg"])
 
-        # En-tête
-        header = tk.Frame(self.root, bg="#3F51B5", height=50)
+        header = tk.Frame(self.root, bg=NORD["header"], height=50)
         header.pack(fill="x")
-        tk.Label(header, text="Gestionnaire Quiz", font=("Arial", 16, "bold"), bg="#3F51B5", fg="white").pack(side="left", padx=10)
-        self.lbl_connected = tk.Label(header, text="0 joueurs connectés", font=("Arial", 12), bg="#3F51B5", fg="white")
+        tk.Label(header, text="Gestionnaire Quiz", font=("Arial", 18, "bold"), bg=NORD["header"], fg=NORD["accent"]).pack(side="left", padx=10)
+        self.lbl_connected = tk.Label(header, text="0 joueurs connectés", font=("Arial", 12), bg=NORD["header"], fg=NORD["fg"])
         self.lbl_connected.pack(side="right", padx=10)
 
-        # Contrôle
-        ctrl = tk.Frame(self.root, bg="#f4f4f4", pady=10)
+        ctrl = tk.Frame(self.root, bg=NORD["bg"], pady=10)
         ctrl.pack()
-        self.btn_start = tk.Button(ctrl, text="🚀 Lancer le Quiz", font=("Arial", 12, "bold"), bg="#4CAF50", fg="white",
-                                   activebackground="#388E3C", command=self.start_quiz)
-        self.btn_start.pack()
+        self.btn_start = tk.Button(ctrl, text="🚀 Lancer le Quiz", font=("Arial", 13, "bold"), bg=NORD["accent"], fg=NORD["bg"],
+                                   activebackground=NORD["button_active"], relief="flat", command=self.start_quiz, cursor="hand2")
+        self.btn_start.pack(pady=8)
 
-        # Question affichée
-        self.lbl_question = tk.Label(self.root, text="Prêt à démarrer...", font=("Arial", 14), bg="#f4f4f4", wraplength=700, pady=20)
+        self.lbl_question = tk.Label(self.root, text="Prêt à démarrer...", font=("Arial", 15), bg=NORD["bg"], fg=NORD["fg"], wraplength=700, pady=20)
         self.lbl_question.pack()
 
-        # Tableau des scores
         self.tree = CustomTreeview(self.root, columns=("pseudo", "score"), show="headings")
         self.tree.heading("pseudo", text="Joueur")
         self.tree.heading("score", text="Score")
-        self.tree.column("pseudo", width=400)
+        self.tree.column("pseudo", width=420)
         self.tree.column("score", width=200, anchor="center")
         self.tree.pack(pady=10, padx=20, fill="both", expand=True)
 
     def setup_mqtt(self):
-        self.client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
+        self.client = mqtt.Client()
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.connect(BROKER, PORT)
         threading.Thread(target=self.client.loop_forever, daemon=True).start()
 
-    def on_connect(self, client, userdata, flags, rc, properties=None):
+    def on_connect(self, client, userdata, flags, rc):
         client.subscribe(TOPICS["presence"])
         client.subscribe(TOPICS["reponse"])
 
@@ -110,7 +116,9 @@ class GestionnaireQuiz:
         answer = data.get("answer_index")
         cid = data.get("client_id")
         if cid in self.clients and qid == self.current_question_index:
-            self.answers_received[qid].append((cid, answer))
+            # Un joueur ne peut répondre qu'une fois par question
+            if not any(x[0] == cid for x in self.answers_received[qid]):
+                self.answers_received[qid].append((cid, answer))
 
     def update_ui(self):
         self.lbl_connected.config(text=f"{len(self.clients)} joueurs connectés")
@@ -119,9 +127,12 @@ class GestionnaireQuiz:
     def update_scoreboard(self):
         for item in self.tree.get_children():
             self.tree.delete(item)
-        sorted_scores = sorted(self.client_scores.items(), key=lambda x: x[1], reverse=True)
+        # Affiche tous les clients, même ceux à 0 point
+        all_scores = [(cid, self.client_scores.get(cid, 0)) for cid in self.clients]
+        sorted_scores = sorted(all_scores, key=lambda x: x[1], reverse=True)
         for i, (cid, score) in enumerate(sorted_scores, start=1):
-            self.tree.insert("", "end", values=(f"{i}. {self.nicknames.get(cid, cid)}", f"{score}"))
+            pseudo = self.nicknames.get(cid, cid)
+            self.tree.insert("", "end", values=(f"{i}. {pseudo}", f"{score}"))
 
     def start_quiz(self):
         if not self.clients:
@@ -136,16 +147,13 @@ class GestionnaireQuiz:
             self.current_question_index = index
             self.lbl_question.config(text=f"Question {index+1}/{len(questions)}\n\n{question['question']}")
             self.answers_received[index] = []
-
             self.client.publish(TOPICS["question"], json.dumps({
                 "id": index,
                 "question": question["question"],
                 "options": question["options"],
                 "timer": 15
             }))
-
             time.sleep(17)
-
             correct_index = question["answer"]
             for client_id, answer_index in self.answers_received[index]:
                 correct = (answer_index == correct_index)
@@ -154,29 +162,29 @@ class GestionnaireQuiz:
                 self.client.publish(f"{TOPICS['feedback']}{client_id}", json.dumps({
                     "answer_index": answer_index,
                     "correct": correct,
-                    "correct_answer_index": correct_index
+                    "correct_answer": correct_index
                 }))
             self.update_scoreboard()
-            time.sleep(3)
-
+            time.sleep(2)
         self.finish_quiz()
 
     def finish_quiz(self):
         total = len(questions)
-        sorted_scores = sorted(self.client_scores.items(), key=lambda x: x[1], reverse=True)
-        for rank, (cid, score) in enumerate(sorted_scores, 1):
+        all_scores = [(cid, self.client_scores.get(cid, 0)) for cid in self.clients]
+        sorted_scores = sorted(all_scores, key=lambda x: x[1], reverse=True)
+        ranks = {cid: i+1 for i, (cid, _) in enumerate(sorted_scores)}
+        total_players = len(self.clients)
+        for cid in self.clients:
+            score = self.client_scores.get(cid, 0)
+            rank = ranks[cid]
             self.client.publish(f"{TOPICS['score']}{cid}", json.dumps({
                 "score": score,
-                "rank": rank,
                 "total": total,
-                "total_players": len(sorted_scores)
+                "rank": rank,
+                "total_players": total_players
             }))
-        self.lbl_question.config(text="🎉 Quiz terminé !", fg="green")
-        self.btn_start.config(state="normal")
-
 
 if __name__ == "__main__":
     root = tk.Tk()
-    ttk.Style().theme_use("clam")
     app = GestionnaireQuiz(root)
     root.mainloop()
