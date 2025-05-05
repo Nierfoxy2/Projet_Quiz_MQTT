@@ -136,6 +136,7 @@ class ClientQuiz:
         client.subscribe(f"quiz/feedback/{self.client_id}")
         client.subscribe(f"quiz/score/{self.client_id}")
         client.subscribe("quiz/classement")
+        client.subscribe("quiz/fin")  # 🔥 nouveau topic
 
         presence = {"id": self.client_id, "nickname": self.nickname}
         client.publish("quiz/presence", json.dumps(presence))
@@ -151,6 +152,8 @@ class ClientQuiz:
             self.master.after(0, self.display_final_score, data)
         elif topic == "quiz/classement": 
             self.master.after(0, self.update_leaderboard, data)
+        elif topic == "quiz/fin":
+            self.master.after(0, self.show_final_results, data)
 
     def display_question(self, data):
         self.stop_timer()
@@ -234,13 +237,50 @@ class ClientQuiz:
         rank = data.get("rank", 0)
         players = data.get("total_players", 0)
 
+        # Afficher un message détaillé de fin de quiz
         self.label_question.config(text="🎉 Quiz terminé !")
         self.result_label.config(
-            text=f"🏆 Score : {score}/{total}\nClassement : {rank}/{players}",
+            text=f"🏆 Score : {score}/{total}\nClassement : {rank}/{players}\nRéponses correctes : {score}",
             fg=NORD["success"]
         )
+        
+        # Affichage d'un message spécial lorsque le quiz est terminé
+        self.result_label.after(3000, self.show_final_message)  # Afficher après 3 secondes
+
         for btn in self.buttons:
             btn.config(text="", state="disabled", bg=NORD["bg"])
+
+    def show_final_message(self):
+        # Afficher un message qui annonce la fin avec le classement final
+        message = f"🎉 Félicitations, {self.nickname} !\nTu as répondu correctement à {self.score} questions.\nTa position finale est {self.rank}."
+        self.result_label.config(text=message, fg=NORD["success"])
+    
+    def show_final_results(self, data):
+        self.stop_timer()
+
+        classement = data.get("classement", [])
+        player_entry = next((p for p in classement if p.get("client_id") == self.client_id), None)
+
+        if player_entry:
+            score = player_entry.get("score", 0)
+            rank = player_entry.get("rang", 0)  + 1
+            total_players = len(classement)
+
+            self.label_question.config(text="🎉 Quiz terminé !")
+            self.result_label.config(
+                text=f"🏆 Tu as répondu correctement à {score} questions.\nTa place finale : {rank}/{total_players}",
+                fg=NORD["success"]
+            )
+        else:
+            self.result_label.config(
+                text="❓ Résultat non trouvé dans le classement.",
+                fg=NORD["error"]
+            )
+
+        for btn in self.buttons:
+            btn.config(text="", state="disabled", bg=NORD["bg"])
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()

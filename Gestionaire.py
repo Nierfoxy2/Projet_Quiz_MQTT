@@ -222,17 +222,45 @@ class GestionnaireQuiz:
             time.sleep(2)
         self.finish_quiz()
 
+
     def finish_quiz(self):
         all_scores = [(cid, self.client_scores.get(cid, 0)) for cid in self.clients]
         sorted_scores = sorted(all_scores, key=lambda x: (-x[1], self.nicknames.get(x[0], "")))
 
-        winners = sorted_scores[:3]
+        # Générer le classement avec gestion des égalités
+        classement = []
+        last_score = None
+        last_rank = 0
+        actual_rank = 1
+
+        for cid, score in sorted_scores:
+            if score == last_score:
+                rank = last_rank
+            else:
+                rank = actual_rank
+
+            last_score = score
+            last_rank = rank
+            actual_rank = rank + 1
+
+            classement.append({
+                "client_id": cid,
+                "nickname": self.nicknames.get(cid, cid),
+                "score": score,
+                "rank": rank
+            })
+
+        # ✅ Publier le classement final aux clients pour qu’ils affichent leur résultat
+        self.client.publish("quiz/fin", json.dumps({"classement": classement}))
+
+        # ✅ Afficher côté gestionnaire
+        winners = classement[:3]
         message = "🏅 Résultats du Quiz 🏅\n\n"
-        for i, (cid, score) in enumerate(winners, start=1):
-            pseudo = self.nicknames.get(cid, cid)
-            message += f"{i}. {pseudo} - {score} pts\n"
+        for player in winners:
+            message += f"{player['rank']}. {player['nickname']} - {player['score']} pts\n"
 
         messagebox.showinfo("Classement Final", message)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
