@@ -22,7 +22,6 @@ PORT = 1883
 
 class ClientQuiz:
     def __init__(self, master):
-        # Initialisation de l'interface et du MQTT
         self.master = master
         self.master.title("🎮 Client Quiz")
         self.master.geometry("520x600")
@@ -36,8 +35,14 @@ class ClientQuiz:
 
         self.get_nickname()
 
+        # ✅ Nouveau : Affichage du pseudo en haut
+        self.label_nickname = tk.Label(master, text=f"👤 Pseudo : {self.nickname}",
+                                       font=("Arial", 14, "bold"),
+                                       bg=NORD["header"], fg=NORD["accent"])
+        self.label_nickname.pack(fill="x", pady=(0, 10))
+
         tk.Label(master, text="Quiz en ligne", font=("Arial", 18, "bold"),
-                 bg=NORD["header"], fg=NORD["accent"]).pack(fill="x", pady=(10, 0))
+                 bg=NORD["header"], fg=NORD["accent"]).pack(fill="x", pady=(0, 0))
 
         self.label_question = tk.Label(master, text="", font=("Arial", 16, "bold"),
                                        wraplength=480, bg=NORD["bg"], fg=NORD["fg"], justify="center")
@@ -73,38 +78,13 @@ class ClientQuiz:
 
         threading.Thread(target=self.client.loop_forever, daemon=True).start()
 
-        # Créer un tableau pour afficher le classement
         self.leaderboard_frame = tk.Frame(master, bg=NORD["bg"])
         self.leaderboard_frame.pack(fill="both", expand=True, pady=10)
 
         self.leaderboard_list = tk.Listbox(self.leaderboard_frame, font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"])
         self.leaderboard_list.pack(fill="both", expand=True)
 
-        # Souscrire au topic pour recevoir le classement
         self.client.subscribe("quiz/classement")
-
-    def on_message(self, client, userdata, msg):
-        topic = msg.topic
-        data = json.loads(msg.payload.decode())
-        if topic == "quiz/question":
-            self.master.after(0, self.display_question, data)
-        elif topic == f"quiz/feedback/{self.client_id}":
-            self.master.after(0, self.display_feedback, data)
-        elif topic == f"quiz/score/{self.client_id}":
-            self.master.after(0, self.display_final_score, data)
-        elif topic == "quiz/classement":
-            self.master.after(0, self.update_leaderboard, data)  # Mise à jour du classement
-
-    def update_leaderboard(self, leaderboard):
-        # Effacer l'ancienne liste
-        self.leaderboard_list.delete(0, tk.END)
-
-        # Mettre à jour la liste du classement
-        for entry in leaderboard:
-            rank = entry['rank']
-            pseudo = entry['pseudo']
-            score = entry['score']
-            self.leaderboard_list.insert(tk.END, f"{rank}. {pseudo} - {score} pts")
 
     def get_nickname(self):
         def submit():
@@ -136,7 +116,7 @@ class ClientQuiz:
         client.subscribe(f"quiz/feedback/{self.client_id}")
         client.subscribe(f"quiz/score/{self.client_id}")
         client.subscribe("quiz/classement")
-        client.subscribe("quiz/fin")  # 🔥 nouveau topic
+        client.subscribe("quiz/fin")  # 🔥
 
         presence = {"id": self.client_id, "nickname": self.nickname}
         client.publish("quiz/presence", json.dumps(presence))
@@ -150,7 +130,7 @@ class ClientQuiz:
             self.master.after(0, self.display_feedback, data)
         elif topic == f"quiz/score/{self.client_id}":
             self.master.after(0, self.display_final_score, data)
-        elif topic == "quiz/classement": 
+        elif topic == "quiz/classement":
             self.master.after(0, self.update_leaderboard, data)
         elif topic == "quiz/fin":
             self.master.after(0, self.show_final_results, data)
@@ -188,8 +168,6 @@ class ClientQuiz:
             for btn in self.buttons:
                 btn.config(state="disabled")
             self.timer_running = False
-
-            # ➡️ Si pas répondu, on envoie une réponse automatique (-1)
             if not self.has_answered and self.current_question:
                 self.send_answer(-1)
 
@@ -237,24 +215,29 @@ class ClientQuiz:
         rank = data.get("rank", 0)
         players = data.get("total_players", 0)
 
-        # Afficher un message détaillé de fin de quiz
         self.label_question.config(text="🎉 Quiz terminé !")
         self.result_label.config(
             text=f"🏆 Score : {score}/{total}\nClassement : {rank}/{players}\nRéponses correctes : {score}",
             fg=NORD["success"]
         )
-        
-        # Affichage d'un message spécial lorsque le quiz est terminé
-        self.result_label.after(3000, self.show_final_message)  # Afficher après 3 secondes
+
+        self.result_label.after(3000, self.show_final_message)
 
         for btn in self.buttons:
             btn.config(text="", state="disabled", bg=NORD["bg"])
 
     def show_final_message(self):
-        # Afficher un message qui annonce la fin avec le classement final
-        message = f"🎉 Félicitations, {self.nickname} !\nTu as répondu correctement à {self.score} questions.\nTa position finale est {self.rank}."
+        message = f"🎉 Félicitations, {self.nickname} !"
         self.result_label.config(text=message, fg=NORD["success"])
-    
+
+    def update_leaderboard(self, leaderboard):
+        self.leaderboard_list.delete(0, tk.END)
+        for entry in leaderboard:
+            rank = entry['rank']
+            pseudo = entry['pseudo']
+            score = entry['score']
+            self.leaderboard_list.insert(tk.END, f"{rank}. {pseudo} - {score} pts")
+
     def show_final_results(self, data):
         self.stop_timer()
 
@@ -263,7 +246,7 @@ class ClientQuiz:
 
         if player_entry:
             score = player_entry.get("score", 0)
-            rank = player_entry.get("rang", 0)  + 1
+            rank = player_entry.get("rank", 0)
             total_players = len(classement)
 
             self.label_question.config(text="🎉 Quiz terminé !")
@@ -279,8 +262,6 @@ class ClientQuiz:
 
         for btn in self.buttons:
             btn.config(text="", state="disabled", bg=NORD["bg"])
-
-
 
 if __name__ == "__main__":
     root = tk.Tk()
