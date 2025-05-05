@@ -9,7 +9,7 @@ NORD = {
     "bg": "#2E3440",
     "fg": "#ECEFF4",
     "accent": "#88C0D0",
-    "button": "#4C566A",
+    "button": "#4C566A",   
     "button_active": "#5E81AC",
     "success": "#A3BE8C",
     "error": "#BF616A",
