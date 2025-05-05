@@ -218,5 +218,335 @@
         ],
         "answer": 1,
         "explanation": "Toutes les araignées ont 8 pattes, ce qui les distingue des insectes."
+    },
+    {
+        "question": "Quel est le plus grand désert du monde ?",
+        "options": [
+            "Désert de Gobi",
+            "Désert d'Atacama",
+            "Sahara",
+            "Antarctique"
+        ],
+        "answer": 3,
+        "explanation": "L'Antarctique est le plus grand désert du monde, bien que ce soit un désert de glace."
+    },
+    {
+        "question": "Qui a écrit 'Les Misérables' ?",
+        "options": [
+            "Victor Hugo",
+            "Émile Zola",
+            "Albert Camus",
+            "Molière"
+        ],
+        "answer": 0,
+        "explanation": "Victor Hugo a écrit ce chef-d'œuvre de la littérature française, publié en 1862."
+    },
+    {
+        "question": "Quel est l'élément chimique le plus abondant dans l'univers ?",
+        "options": [
+            "Hydrogène",
+            "Oxygène",
+            "Carbone",
+            "Hélium"
+        ],
+        "answer": 0,
+        "explanation": "L'hydrogène est l'élément chimique le plus abondant dans l'univers."
+    },
+    {
+        "question": "Quel est le plus grand pays du monde en superficie ?",
+        "options": [
+            "États-Unis",
+            "Canada",
+            "Chine",
+            "Russie"
+        ],
+        "answer": 3,
+        "explanation": "La Russie est le plus grand pays du monde en superficie."
+    },
+    {
+        "question": "Combien de continents y a-t-il sur Terre ?",
+        "options": [
+            "5",
+            "6",
+            "7",
+            "8"
+        ],
+        "answer": 2,
+        "explanation": "Il y a 7 continents sur Terre : Afrique, Amérique, Antarctique, Asie, Europe, Océanie et Amérique."
+    },
+    {
+        "question": "Quel est l'animal terrestre le plus lourd ?",
+        "options": [
+            "Éléphant d'Afrique",
+            "Bison",
+            "Rhinocéros blanc",
+            "Girafe"
+        ],
+        "answer": 0,
+        "explanation": "L'éléphant d'Afrique est l'animal terrestre le plus lourd, pesant jusqu'à 6 000 kg."
+    },
+    {
+        "question": "Quel est le plus grand fleuve du monde ?",
+        "options": [
+            "Amazone",
+            "Nil",
+            "Mississippi",
+            "Yangtsé"
+        ],
+        "answer": 0,
+        "explanation": "Le fleuve Amazone, en Amérique du Sud, est le plus long du monde."
+    },
+    {
+        "question": "Qui a inventé l'imprimerie ?",
+        "options": [
+            "Johannes Gutenberg",
+            "Thomas Edison",
+            "Albert Einstein",
+            "Leonardo da Vinci"
+        ],
+        "answer": 0,
+        "explanation": "Johannes Gutenberg a inventé l'imprimerie au XVe siècle."
+    },
+    {
+        "question": "Quelle est la capitale de l'Australie ?",
+        "options": [
+            "Sydney",
+            "Melbourne",
+            "Canberra",
+            "Brisbane"
+        ],
+        "answer": 2,
+        "explanation": "Canberra est la capitale de l'Australie, et non Sydney ou Melbourne."
+    },
+    {
+        "question": "Quelle est la monnaie du Japon ?",
+        "options": [
+            "Yuan",
+            "Won",
+            "Yen",
+            "Ringgit"
+        ],
+        "answer": 2,
+        "explanation": "La monnaie du Japon est le yen (¥)."
+    },
+    {
+        "question": "Quelle est la plus grande île du monde ?",
+        "options": [
+            "Grønland",
+            "Nouvelle-Guinée",
+            "Borneo",
+            "Madagascar"
+        ],
+        "answer": 0,
+        "explanation": "Le Groenland est la plus grande île du monde, avec une superficie de plus de 2 millions de km²."
+    },
+    {
+        "question": "Quel est le plus grand océan de la Terre ?",
+        "options": [
+            "Océan Atlantique",
+            "Océan Pacifique",
+            "Océan Indien",
+            "Océan Arctique"
+        ],
+        "answer": 1,
+        "explanation": "L'océan Pacifique est le plus grand océan de la Terre, couvrant environ un tiers de la surface terrestre."
+    },
+    {
+        "question": "Qui a été le premier homme à marcher sur la Lune ?",
+        "options": [
+            "Yuri Gagarin",
+            "Buzz Aldrin",
+            "Neil Armstrong",
+            "John Glenn"
+        ],
+        "answer": 2,
+        "explanation": "Neil Armstrong fut le premier homme à marcher sur la Lune le 20 juillet 1969."
+    },
+    {
+        "question": "Quelle est la capitale de la France ?",
+        "options": [
+            "Paris",
+            "Lyon",
+            "Marseille",
+            "Bordeaux"
+        ],
+        "answer": 0,
+        "explanation": "La capitale de la France est Paris."
+    },
+    {
+        "question": "Quel est le plus grand volcan du monde ?",
+        "options": [
+            "Kilauea",
+            "Mont Fuji",
+            "Mauna Loa",
+            "Vésuve"
+        ],
+        "answer": 2,
+        "explanation": "Le Mauna Loa, à Hawaï, est le plus grand volcan du monde."
+    },
+    {
+        "question": "Quel est le principal gaz responsable de l'effet de serre ?",
+        "options": [
+            "Oxygène",
+            "Dioxyde de carbone",
+            "Méthane",
+            "Azote"
+        ],
+        "answer": 1,
+        "explanation": "Le dioxyde de carbone (CO2) est le gaz le plus responsable de l'effet de serre."
+    },
+    {
+        "question": "Quel est le nom de la plus grande pyramide d'Égypte ?",
+        "options": [
+            "Pyramide de Gizeh",
+            "Pyramide de Khéphren",
+            "Pyramide de Mykérinos",
+            "Pyramide de Saqqarah"
+        ],
+        "answer": 0,
+        "explanation": "La pyramide de Gizeh est la plus grande et la plus connue des pyramides d'Égypte."
+    },
+    {
+        "question": "Quelle est la première lettre de l'alphabet grec ?",
+        "options": [
+            "Alpha",
+            "Bêta",
+            "Gamma",
+            "Oméga"
+        ],
+        "answer": 0,
+        "explanation": "La première lettre de l'alphabet grec est Alpha (Α)."
+    },
+    {
+        "question": "Quel est le nom du plus grand animal vivant ?",
+        "options": [
+            "Eléphant d'Afrique",
+            "Baleine bleue",
+            "Girafe",
+            "Requin baleine"
+        ],
+        "answer": 1,
+        "explanation": "La baleine bleue est le plus grand animal vivant sur Terre."
+    },
+    {
+        "question": "Qui a formulé la théorie de la relativité ?",
+        "options": [
+            "Isaac Newton",
+            "Galilée",
+            "Albert Einstein",
+            "Nikola Tesla"
+        ],
+        "answer": 2,
+        "explanation": "La théorie de la relativité a été formulée par Albert Einstein."
+    },
+    {
+        "question": "Dans quelle ville se trouve la Tour Eiffel ?",
+        "options": [
+            "Paris",
+            "Londres",
+            "Rome",
+            "Berlin"
+        ],
+        "answer": 0,
+        "explanation": "La Tour Eiffel se trouve à Paris, en France."
+    },
+    {
+        "question": "Qui est l’auteur de '1984' ?",
+        "options": [
+            "Aldous Huxley",
+            "George Orwell",
+            "Ray Bradbury",
+            "Philip K. Dick"
+        ],
+        "answer": 1,
+        "explanation": "'1984' est un roman de George Orwell, publié en 1949."
+    },
+    {
+        "question": "Quel est le plus grand lac d'Afrique ?",
+        "options": [
+            "Lac Tanganyika",
+            "Lac Victoria",
+            "Lac Malawi",
+            "Lac Tchad"
+        ],
+        "answer": 1,
+        "explanation": "Le lac Victoria est le plus grand lac d'Afrique, situé entre plusieurs pays, dont le Kenya et l'Ouganda."
+    },
+    {
+        "question": "En quelle année l’homme a-t-il marché sur la Lune pour la première fois ?",
+        "options": [
+            "1969",
+            "1959",
+            "1975",
+            "1981"
+        ],
+        "answer": 0,
+        "explanation": "L'homme a marché sur la Lune pour la première fois en 1969, lors de la mission Apollo 11."
+    },
+    {
+        "question": "Quel est le plus grand parc national du monde ?",
+        "options": [
+            "Parc national de Yellowstone",
+            "Parc national de la Terre de Baffin",
+            "Parc national de Kakadu",
+            "Parc national du Groenland"
+        ],
+        "answer": 3,
+        "explanation": "Le parc national du Groenland est le plus grand parc national du monde, couvrant 972 000 km²."
+    },
+    {
+        "question": "Quel pays a été le premier à accorder le droit de vote aux femmes ?",
+        "options": [
+            "États-Unis",
+            "Nouvelle-Zélande",
+            "Suède",
+            "Finlande"
+        ],
+        "answer": 1,
+        "explanation": "La Nouvelle-Zélande a été le premier pays à accorder le droit de vote aux femmes en 1893."
+    },
+    {
+        "question": "Quel est le plus grand animal terrestre ?",
+        "options": [
+            "Gorille",
+            "Eléphant d'Afrique",
+            "Rhinocéros",
+            "Bison"
+        ],
+        "answer": 1,
+        "explanation": "L'éléphant d'Afrique est le plus grand animal terrestre, pouvant peser jusqu'à 6 000 kg."
+    },
+    {
+        "question": "Quel est le nom du plus grand glacier du monde ?",
+        "options": [
+            "Glacier Lambert",
+            "Glacier Perito Moreno",
+            "Glacier de Vatnajökull",
+            "Glacier de Baffin"
+        ],
+        "answer": 0,
+        "explanation": "Le glacier Lambert, en Antarctique, est le plus grand glacier du monde."
+    },
+    {
+        "question": "Dans quelle ville a eu lieu la première exposition universelle ?",
+        "options": [
+            "Paris",
+            "Londres",
+            "New York",
+            "Vienne"
+        ],
+        "answer": 1,
+        "explanation": "La première exposition universelle a eu lieu à Londres en 1851."
+    },
+    {
+        "question": "Quel est l'élément chimique le plus abondant sur Terre ?",
+        "options": [
+            "Oxygène",
+            "Silicium",
+            "Fer",
+            "Hydrogène"
+        ],
+        "answer": 0,
+        "explanation": "L'oxygène est l'élément chimique le plus abondant sur Terre, représentant environ 46% de la croûte terrestre."
     }
 ]
