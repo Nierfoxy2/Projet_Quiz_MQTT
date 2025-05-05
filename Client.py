@@ -4,7 +4,7 @@ import json
 import paho.mqtt.client as mqtt
 import threading
 
-# Thème Nord foncé (même que gestionnaire)
+# Thème Nord foncé
 NORD = {
     "bg": "#2E3440",
     "fg": "#ECEFF4",
@@ -50,7 +50,6 @@ class ClientQuiz:
                             activebackground=NORD["button_active"], activeforeground=NORD["fg"],
                             relief="ridge", bd=2, cursor="hand2")
             btn.pack(pady=7)
-            # Effet hover
             btn.bind("<Enter>", lambda e, b=btn: b.config(bg=NORD["button_active"]))
             btn.bind("<Leave>", lambda e, b=btn: b.config(bg=NORD["button"]))
             self.buttons.append(btn)
@@ -132,7 +131,7 @@ class ClientQuiz:
             else:
                 btn.config(text="", state="disabled", bg=NORD["bg"])
 
-        self.time_left = data.get("timer", 15)
+        self.time_left = data.get("timer", 10)
         self.timer_running = True
         self.update_timer()
 
@@ -150,6 +149,10 @@ class ClientQuiz:
                 btn.config(state="disabled")
             self.timer_running = False
 
+            # ➡️ Si pas répondu, on envoie une réponse automatique (-1)
+            if not self.has_answered and self.current_question:
+                self.send_answer(-1)
+
     def stop_timer(self):
         self.timer_running = False
         if self.timer_id is not None:
@@ -160,7 +163,6 @@ class ClientQuiz:
         if not self.current_question or self.has_answered:
             return
         self.has_answered = True
-        # Les boutons sont désactivés, mais le timer continue
         for btn in self.buttons:
             btn.config(state="disabled")
         answer = {
@@ -172,7 +174,6 @@ class ClientQuiz:
 
     def display_feedback(self, data):
         correct = data.get("correct", False)
-        # Compatibilité : accepte "correct_answer" ou "correct_answer_index"
         correct_index = data.get("correct_answer")
         if correct_index is None:
             correct_index = data.get("correct_answer_index")
