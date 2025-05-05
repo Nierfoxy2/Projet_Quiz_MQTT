@@ -22,6 +22,7 @@ PORT = 1883
 
 class ClientQuiz:
     def __init__(self, master):
+        # Initialisation de l'interface et du MQTT
         self.master = master
         self.master.title("🎮 Client Quiz")
         self.master.geometry("520x600")
@@ -72,6 +73,39 @@ class ClientQuiz:
 
         threading.Thread(target=self.client.loop_forever, daemon=True).start()
 
+        # Créer un tableau pour afficher le classement
+        self.leaderboard_frame = tk.Frame(master, bg=NORD["bg"])
+        self.leaderboard_frame.pack(fill="both", expand=True, pady=10)
+
+        self.leaderboard_list = tk.Listbox(self.leaderboard_frame, font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"])
+        self.leaderboard_list.pack(fill="both", expand=True)
+
+        # Souscrire au topic pour recevoir le classement
+        self.client.subscribe("quiz/classement")
+
+    def on_message(self, client, userdata, msg):
+        topic = msg.topic
+        data = json.loads(msg.payload.decode())
+        if topic == "quiz/question":
+            self.master.after(0, self.display_question, data)
+        elif topic == f"quiz/feedback/{self.client_id}":
+            self.master.after(0, self.display_feedback, data)
+        elif topic == f"quiz/score/{self.client_id}":
+            self.master.after(0, self.display_final_score, data)
+        elif topic == "quiz/classement":
+            self.master.after(0, self.update_leaderboard, data)  # Mise à jour du classement
+
+    def update_leaderboard(self, leaderboard):
+        # Effacer l'ancienne liste
+        self.leaderboard_list.delete(0, tk.END)
+
+        # Mettre à jour la liste du classement
+        for entry in leaderboard:
+            rank = entry['rank']
+            pseudo = entry['pseudo']
+            score = entry['score']
+            self.leaderboard_list.insert(tk.END, f"{rank}. {pseudo} - {score} pts")
+
     def get_nickname(self):
         def submit():
             name = entry.get()
@@ -101,6 +135,7 @@ class ClientQuiz:
         client.subscribe("quiz/question")
         client.subscribe(f"quiz/feedback/{self.client_id}")
         client.subscribe(f"quiz/score/{self.client_id}")
+        client.subscribe("quiz/classement")
 
         presence = {"id": self.client_id, "nickname": self.nickname}
         client.publish("quiz/presence", json.dumps(presence))
@@ -114,6 +149,8 @@ class ClientQuiz:
             self.master.after(0, self.display_feedback, data)
         elif topic == f"quiz/score/{self.client_id}":
             self.master.after(0, self.display_final_score, data)
+        elif topic == "quiz/classement": 
+            self.master.after(0, self.update_leaderboard, data)
 
     def display_question(self, data):
         self.stop_timer()

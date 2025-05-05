@@ -139,29 +139,25 @@ class GestionnaireQuiz:
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-        # Récupérer les scores des joueurs
         all_scores = [(cid, self.client_scores.get(cid, 0)) for cid in self.clients]
         sorted_scores = sorted(all_scores, key=lambda x: (-x[1], self.nicknames.get(x[0], "")))
 
-        # Initialiser les variables pour gérer les égalités
         last_score = None
         last_rank = 0
         actual_rank = 1
 
+        leaderboard = []  # Liste pour envoyer le classement
+
         for i, (cid, score) in enumerate(sorted_scores):
-            # Si le score actuel est égal au précédent, les joueurs ont le même rang
             if score == last_score:
                 rank = last_rank
             else:
-                # Sinon, c'est un nouveau score, donc on attribue un nouveau rang
                 rank = actual_rank
-        
-            # Mettre à jour last_score et last_rank pour le prochain tour
+            
             last_score = score
             last_rank = rank
-            actual_rank = rank + 1  # La prochaine place sera décalée
+            actual_rank = rank + 1
 
-            # Affichage du classement dans le tableau
             pseudo = self.nicknames.get(cid, cid)
             if rank == 1:
                 pseudo = f"🏆 {pseudo}"
@@ -170,7 +166,19 @@ class GestionnaireQuiz:
             elif rank == 3:
                 pseudo = f"🥉 {pseudo}"
 
+            # Ajouter le joueur au classement
+            leaderboard.append({
+                "rank": rank,
+                "pseudo": pseudo,
+                "score": score
+            })
+
+            # Affichage dans l'interface du gestionnaire
             self.tree.insert("", "end", values=(pseudo, f"{score}"))
+
+        # Publier le classement sur un topic MQTT
+        self.client.publish("quiz/classement", json.dumps(leaderboard))
+
 
 
     def start_quiz(self):
