@@ -4,8 +4,10 @@ import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
 from collections import defaultdict
+import random
 import paho.mqtt.client as mqtt
 
+# Thème Nord
 NORD = {
     "bg": "#2E3440",
     "fg": "#ECEFF4",
@@ -17,6 +19,7 @@ NORD = {
     "warning": "#EBCB8B",
     "header": "#3B4252"
 }
+
 BROKER = "broker.hivemq.com"
 PORT = 1883
 TOPICS = {
@@ -27,8 +30,9 @@ TOPICS = {
     "feedback": "quiz/feedback/"
 }
 
+# Charger toutes les questions
 with open("questions.json", "r", encoding="utf-8") as f:
-    questions = json.load(f)
+    all_questions = json.load(f)
 
 class CustomTreeview(ttk.Treeview):
     def __init__(self, master=None, **kwargs):
@@ -47,13 +51,15 @@ class GestionnaireQuiz:
         self.nicknames = {}
         self.started = False
         self.current_question_index = 0
+        self.questions = []
+        self.nb_questions = tk.IntVar(value=5)
 
         self.setup_ui()
         self.setup_mqtt()
 
     def setup_ui(self):
         self.root.title("🎓 Gestionnaire Quiz")
-        self.root.geometry("820x600")
+        self.root.geometry("850x650")
         self.root.configure(bg=NORD["bg"])
 
         header = tk.Frame(self.root, bg=NORD["header"], height=50)
@@ -64,11 +70,16 @@ class GestionnaireQuiz:
 
         ctrl = tk.Frame(self.root, bg=NORD["bg"], pady=10)
         ctrl.pack()
+
+        tk.Label(ctrl, text="Nombre de questions :", font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"]).pack(side="left", padx=5)
+        self.entry_questions = tk.Entry(ctrl, textvariable=self.nb_questions, font=("Arial", 12), width=5, justify="center")
+        self.entry_questions.pack(side="left", padx=5)
+
         self.btn_start = tk.Button(ctrl, text="🚀 Lancer le Quiz", font=("Arial", 13, "bold"), bg=NORD["accent"], fg=NORD["bg"],
                                    activebackground=NORD["button_active"], relief="flat", command=self.start_quiz, cursor="hand2")
-        self.btn_start.pack(pady=8)
+        self.btn_start.pack(side="left", padx=10)
 
-        self.lbl_question = tk.Label(self.root, text="Prêt à démarrer...", font=("Arial", 15), bg=NORD["bg"], fg=NORD["fg"], wraplength=700, pady=20)
+        self.lbl_question = tk.Label(self.root, text="Prêt à démarrer...", font=("Arial", 11), bg=NORD["bg"], fg=NORD["fg"], wraplength=700, pady=20)
         self.lbl_question.pack()
 
         self.tree = CustomTreeview(self.root, columns=("pseudo", "score"), show="headings")
@@ -97,7 +108,7 @@ class GestionnaireQuiz:
             elif msg.topic == TOPICS["reponse"] and self.started:
                 self.handle_answer(data)
         except Exception as e:
-            print(f"Erreur de message MQTT : {e}")
+            print(f"Erreur MQTT : {e}")
 
     def handle_presence(self, data):
         client_id = data.get("id")
@@ -116,42 +127,56 @@ class GestionnaireQuiz:
         answer = data.get("answer_index")
         cid = data.get("client_id")
         if cid in self.clients and qid == self.current_question_index:
-            # Un joueur ne peut répondre qu'une fois par question
             if not any(x[0] == cid for x in self.answers_received[qid]):
                 self.answers_received[qid].append((cid, answer))
+                self.update_scoreboard(live_update=True)
 
     def update_ui(self):
         self.lbl_connected.config(text=f"{len(self.clients)} joueurs connectés")
         self.update_scoreboard()
 
-    def update_scoreboard(self):
+    def update_scoreboard(self, live_update=False):
         for item in self.tree.get_children():
             self.tree.delete(item)
-        # Affiche tous les clients, même ceux à 0 point
+
         all_scores = [(cid, self.client_scores.get(cid, 0)) for cid in self.clients]
-        sorted_scores = sorted(all_scores, key=lambda x: x[1], reverse=True)
+        sorted_scores = sorted(all_scores, key=lambda x: (-x[1], self.nicknames.get(x[0], "")))
+
         for i, (cid, score) in enumerate(sorted_scores, start=1):
             pseudo = self.nicknames.get(cid, cid)
-            self.tree.insert("", "end", values=(f"{i}. {pseudo}", f"{score}"))
+            if i == 1:
+                pseudo = f"🏆 {pseudo}"
+            elif i == 2:
+                pseudo = f"🥈 {pseudo}"
+            elif i == 3:
+                pseudo = f"🥉 {pseudo}"
+            self.tree.insert("", "end", values=(pseudo, f"{score}"))
 
     def start_quiz(self):
         if not self.clients:
             messagebox.showwarning("Avertissement", "Aucun joueur connecté.")
             return
+
+        nb = self.nb_questions.get()
+        if nb <= 0 or nb > len(all_questions):
+            messagebox.showerror("Erreur", f"Nombre de questions invalide (max {len(all_questions)})")
+            return
+
+        self.questions = random.sample(all_questions, nb)
         self.btn_start.config(state="disabled")
         self.started = True
         threading.Thread(target=self.run_quiz, daemon=True).start()
 
     def run_quiz(self):
-        for index, question in enumerate(questions):
+        for index, question in enumerate(self.questions):
             self.current_question_index = index
-            self.lbl_question.config(text=f"Question {index+1}/{len(questions)}\n\n{question['question']}")
+            self.lbl_question.config(text=f"Question {index+1}/{len(self.questions)}\n\n{question['question']}")
             self.answers_received[index] = []
             self.client.publish(TOPICS["question"], json.dumps({
                 "id": index,
                 "question": question["question"],
                 "options": question["options"],
-                "timer": 15
+                "timer": 10
             }))
             time.sleep(17)
             correct_index = question["answer"]
@@ -169,20 +194,16 @@ class GestionnaireQuiz:
         self.finish_quiz()
 
     def finish_quiz(self):
-        total = len(questions)
         all_scores = [(cid, self.client_scores.get(cid, 0)) for cid in self.clients]
-        sorted_scores = sorted(all_scores, key=lambda x: x[1], reverse=True)
-        ranks = {cid: i+1 for i, (cid, _) in enumerate(sorted_scores)}
-        total_players = len(self.clients)
-        for cid in self.clients:
-            score = self.client_scores.get(cid, 0)
-            rank = ranks[cid]
-            self.client.publish(f"{TOPICS['score']}{cid}", json.dumps({
-                "score": score,
-                "total": total,
-                "rank": rank,
-                "total_players": total_players
-            }))
+        sorted_scores = sorted(all_scores, key=lambda x: (-x[1], self.nicknames.get(x[0], "")))
+
+        winners = sorted_scores[:3]
+        message = "🏅 Résultats du Quiz 🏅\n\n"
+        for i, (cid, score) in enumerate(winners, start=1):
+            pseudo = self.nicknames.get(cid, cid)
+            message += f"{i}. {pseudo} - {score} pts\n"
+
+        messagebox.showinfo("Classement Final", message)
 
 if __name__ == "__main__":
     root = tk.Tk()
