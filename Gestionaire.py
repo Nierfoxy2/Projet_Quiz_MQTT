@@ -152,11 +152,10 @@ class GestionnaireQuiz:
             if score == last_score:
                 rank = last_rank
             else:
-                rank = actual_rank
-            
+                rank = i + 1  # 👈 Le rang devient l’index+1 (compétitif)
+
             last_score = score
             last_rank = rank
-            actual_rank = rank + 1
 
             pseudo = self.nicknames.get(cid, cid)
             if rank == 1:
@@ -166,14 +165,12 @@ class GestionnaireQuiz:
             elif rank == 3:
                 pseudo = f"🥉 {pseudo}"
 
-            # Ajouter le joueur au classement
             leaderboard.append({
                 "rank": rank,
                 "pseudo": pseudo,
                 "score": score
             })
 
-            # Affichage dans l'interface du gestionnaire
             self.tree.insert("", "end", values=(pseudo, f"{score}"))
 
         # Publier le classement sur un topic MQTT
@@ -233,15 +230,14 @@ class GestionnaireQuiz:
         last_rank = 0
         actual_rank = 1
 
-        for cid, score in sorted_scores:
+        for i, (cid, score) in enumerate(sorted_scores):
             if score == last_score:
                 rank = last_rank
             else:
-                rank = actual_rank
+                rank = i + 1  # 👈 Correction ici aussi
 
             last_score = score
             last_rank = rank
-            actual_rank = rank + 1
 
             classement.append({
                 "client_id": cid,
@@ -249,6 +245,7 @@ class GestionnaireQuiz:
                 "score": score,
                 "rank": rank
             })
+
 
         # ✅ Publier le classement final aux clients pour qu’ils affichent leur résultat
         self.client.publish("quiz/fin", json.dumps({"classement": classement}))
