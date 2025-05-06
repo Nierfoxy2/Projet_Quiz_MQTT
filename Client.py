@@ -104,7 +104,7 @@ class ClientQuiz:
     def on_connect(self, client, userdata, flags, rc):
         client.subscribe("quiz/question")
         client.subscribe(f"quiz/feedback/{self.client_id}")
-        client.subscribe(f"quiz/score/{self.client_id}")
+        #client.subscribe(f"quiz/score/{self.client_id}")
         client.subscribe("quiz/classement")
         client.subscribe("quiz/fin")  # 🔥
 
@@ -118,8 +118,8 @@ class ClientQuiz:
             self.master.after(0, self.display_question, data)
         elif topic == f"quiz/feedback/{self.client_id}":
             self.master.after(0, self.display_feedback, data)
-        elif topic == f"quiz/score/{self.client_id}":
-            self.master.after(0, self.display_final_score, data)
+        #elif topic == f"quiz/score/{self.client_id}":
+        #    self.master.after(0, self.display_final_score, data)
         elif topic == "quiz/classement":
             self.master.after(0, self.update_leaderboard, data)
         elif topic == "quiz/fin":

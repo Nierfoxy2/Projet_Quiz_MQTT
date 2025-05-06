@@ -323,8 +323,8 @@ class GestionnaireQuiz:
         nb = self.nb_questions.get()
         timer = self.timer_duration.get()
 
-        if timer <= 0 or timer > 60:
-            messagebox.showerror("Erreur", "Le temps doit être compris entre 1 et 60 secondes.")
+        if timer <= 4 or timer > 61:
+            messagebox.showerror("Erreur", "Le temps doit être compris entre 5 et 60 secondes.")
             return
 
         questions = []
@@ -354,9 +354,9 @@ class GestionnaireQuiz:
                 "id": index,
                 "question": question["question"],
                 "options": question["options"],
-                "timer": 10
+                "timer": self.timer_duration.get()
             }))
-            time.sleep(17)
+            time.sleep(self.timer_duration.get() + 2)
             correct_index = question["answer"]
             for client_id, answer_index in self.answers_received[index]:
                 correct = (answer_index == correct_index)
