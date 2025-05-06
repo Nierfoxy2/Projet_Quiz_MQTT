@@ -35,9 +35,7 @@ class ClientQuiz:
 
         self.get_nickname()
 
-        # ✅ Nouveau : Affichage du pseudo en haut
-        self.label_nickname = tk.Label(master, text=f"👤 Pseudo : {self.nickname}",
-                                       font=("Arial", 14, "bold"),
+        self.label_nickname = tk.Label(master, text=f"👤 Pseudo : {self.nickname}", font=("Arial", 14, "bold"),
                                        bg=NORD["header"], fg=NORD["accent"])
         self.label_nickname.pack(fill="x", pady=(0, 10))
 
@@ -48,17 +46,10 @@ class ClientQuiz:
                                        wraplength=480, bg=NORD["bg"], fg=NORD["fg"], justify="center")
         self.label_question.pack(pady=20)
 
+        # Frame pour les boutons de réponse
+        self.buttons_frame = tk.Frame(master, bg=NORD["bg"])
+        self.buttons_frame.pack(pady=10)
         self.buttons = []
-        for i in range(4):
-            btn = tk.Button(master, text="", font=("Arial", 13, "bold"), width=40, height=2,
-                            command=lambda idx=i: self.send_answer(idx),
-                            bg=NORD["button"], fg=NORD["accent"],
-                            activebackground=NORD["button_active"], activeforeground=NORD["fg"],
-                            relief="ridge", bd=2, cursor="hand2")
-            btn.pack(pady=7)
-            btn.bind("<Enter>", lambda e, b=btn: b.config(bg=NORD["button_active"]))
-            btn.bind("<Leave>", lambda e, b=btn: b.config(bg=NORD["button"]))
-            self.buttons.append(btn)
 
         self.timer_label = tk.Label(master, text="", font=("Arial", 14, "bold"),
                                     bg=NORD["bg"], fg=NORD["warning"])
@@ -80,7 +71,6 @@ class ClientQuiz:
 
         self.leaderboard_frame = tk.Frame(master, bg=NORD["bg"])
         self.leaderboard_frame.pack(fill="both", expand=True, pady=10)
-
         self.leaderboard_list = tk.Listbox(self.leaderboard_frame, font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"])
         self.leaderboard_list.pack(fill="both", expand=True)
 
@@ -145,11 +135,20 @@ class ClientQuiz:
         self.label_question.config(text=question_text)
         self.result_label.config(text="")
 
-        for i, btn in enumerate(self.buttons):
-            if i < len(options):
-                btn.config(text=options[i], state="normal", bg=NORD["button"], fg=NORD["accent"])
-            else:
-                btn.config(text="", state="disabled", bg=NORD["bg"])
+        # Détruire les anciens boutons
+        for btn in self.buttons:
+            btn.destroy()
+        self.buttons = []
+
+        # Créer dynamiquement les boutons selon le nombre d'options
+        for i, option in enumerate(options):
+            btn = tk.Button(self.buttons_frame, text=option, font=("Arial", 13, "bold"), width=40, height=2,
+                            command=lambda idx=i: self.send_answer(idx),
+                            bg=NORD["button"], fg=NORD["accent"],
+                            activebackground=NORD["button_active"], activeforeground=NORD["fg"],
+                            relief="ridge", bd=2, cursor="hand2")
+            btn.pack(pady=7)
+            self.buttons.append(btn)
 
         self.time_left = data.get("timer", 10)
         self.timer_running = True

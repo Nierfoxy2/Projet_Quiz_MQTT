@@ -42,6 +42,39 @@ class CustomTreeview(ttk.Treeview):
         style.configure("Treeview.Heading", font=("Arial", 12, "bold"), background=NORD["header"], foreground=NORD["accent"])
         style.configure("Treeview", rowheight=28, font=("Arial", 11), background=NORD["bg"], fieldbackground=NORD["bg"], foreground=NORD["fg"])
 
+class ScrollableFrame(tk.Frame):
+    def __init__(self, container, *args, **kwargs):
+        super().__init__(container, *args, **kwargs)
+        
+        canvas = tk.Canvas(self, bg=NORD["bg"], highlightthickness=0)
+        scrollbar = tk.Scrollbar(self, orient="vertical", command=canvas.yview)
+        self.scrollable_frame = tk.Frame(canvas, bg=NORD["bg"])
+
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all"),
+                width=e.width  # Force le canvas à prendre la même largeur que le contenu (centrage)
+            )
+        )
+
+        window = canvas.create_window((0, 0), window=self.scrollable_frame, anchor="n")
+
+        def resize_canvas(event):
+            canvas.itemconfig(window, width=event.width)
+
+        canvas.bind("<Configure>", resize_canvas)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Scroll molette
+        self.scrollable_frame.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units")))
+        self.scrollable_frame.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
+
+
+
 class GestionnaireQuiz:
     def __init__(self, root):
         self.root = root
@@ -51,8 +84,10 @@ class GestionnaireQuiz:
         self.nicknames = {}
         self.started = False
         self.current_question_index = 0
-        self.questions = []
         self.nb_questions = tk.IntVar(value=5)
+        self.custom_questions = []
+        self.mode_selection = tk.StringVar(value="Classiques")
+        self.timer_duration = tk.IntVar(value=15)
 
         self.setup_ui()
         self.setup_mqtt()
@@ -75,6 +110,14 @@ class GestionnaireQuiz:
         self.entry_questions = tk.Entry(ctrl, textvariable=self.nb_questions, font=("Arial", 12), width=5, justify="center")
         self.entry_questions.pack(side="left", padx=5)
 
+        tk.Label(ctrl, text="Mode :", font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"]).pack(side="left", padx=5)
+        self.combo_mode = ttk.Combobox(ctrl, textvariable=self.mode_selection, values=["Classiques", "Personnalisées"], state="readonly", width=15)
+        self.combo_mode.pack(side="left", padx=5)
+
+        tk.Label(ctrl, text="Temps par question (en secondes) :", font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"]).pack(side="left", padx=5)
+        self.entry_timer = tk.Entry(ctrl, textvariable=self.timer_duration, font=("Arial", 12), width=5, justify="center")
+        self.entry_timer.pack(side="left", padx=5)
+
         self.btn_start = tk.Button(ctrl, text="🚀 Lancer le Quiz", font=("Arial", 13, "bold"), bg=NORD["accent"], fg=NORD["bg"],
                                    activebackground=NORD["button_active"], relief="flat", command=self.start_quiz, cursor="hand2")
         self.btn_start.pack(side="left", padx=10)
@@ -88,6 +131,69 @@ class GestionnaireQuiz:
         self.tree.column("pseudo", width=420)
         self.tree.column("score", width=200, anchor="center")
         self.tree.pack(pady=10, padx=20, fill="both", expand=True)
+
+        # --- Partie création de question centrée et organisée ---
+        separator = tk.Label(self.root, text="Créer une nouvelle question :", font=("Arial", 14, "bold"), bg=NORD["bg"], fg=NORD["accent"])
+        separator.pack(pady=10)
+
+        scroll_frame = ScrollableFrame(self.root, height=300)
+        scroll_frame.pack(fill="x", padx=10, pady=5)
+
+        create_frame = scroll_frame.scrollable_frame
+
+
+        # Question centrée
+        question_frame = tk.Frame(create_frame, bg=NORD["bg"])
+        question_frame.pack(pady=5)
+        tk.Label(question_frame, text="Question :", font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"]).pack(side="left", padx=5)
+        self.entry_new_question = tk.Entry(question_frame, font=("Arial", 12), width=60)
+        self.entry_new_question.pack(side="left", padx=5)
+
+        # Choix centrés et organisés (2 au départ)
+        self.choices_frame = tk.Frame(create_frame, bg=NORD["bg"])
+        self.choices_frame.pack(pady=5)
+        self.entries_choices = []
+        self.max_choices = 6
+        self.init_choices(2)
+
+        # Bouton pour ajouter un choix
+        self.btn_add_choice = tk.Button(create_frame, text="Ajouter un choix", font=("Arial", 11),
+                                        bg=NORD["button"], fg=NORD["fg"], activebackground=NORD["button_active"],
+                                        command=self.add_choice, cursor="hand2")
+        self.btn_add_choice.pack(pady=3)
+
+        # Bonne réponse centrée
+        answer_frame = tk.Frame(create_frame, bg=NORD["bg"])
+        answer_frame.pack(pady=5)
+        self.correct_choice = tk.IntVar(value=0)
+        tk.Label(answer_frame, text="Index bonne réponse (0,1...)", font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"]).pack(side="left", padx=5)
+        self.entry_correct = tk.Entry(answer_frame, textvariable=self.correct_choice, font=("Arial", 12), width=5)
+        self.entry_correct.pack(side="left", padx=5)
+
+        # Bouton ajouter question centré
+        self.btn_add_question = tk.Button(create_frame, text="➕ Envoyer Question", font=("Arial", 13), bg=NORD["accent"], fg=NORD["bg"],
+                                          activebackground=NORD["button_active"], relief="flat", command=self.add_custom_question, cursor="hand2")
+        self.btn_add_question.pack(pady=10)
+
+    def init_choices(self, n):
+        # Efface les anciens champs
+        for widget in self.choices_frame.winfo_children():
+            widget.destroy()
+        self.entries_choices.clear()
+        for i in range(n):
+            self.add_choice(init=True)
+
+    def add_choice(self, init=False):
+        if len(self.entries_choices) >= self.max_choices:
+            messagebox.showinfo("Limite", f"Tu ne peux pas avoir plus de {self.max_choices} choix.")
+            return
+        idx = len(self.entries_choices)
+        row_frame = tk.Frame(self.choices_frame, bg=NORD["bg"])
+        row_frame.pack(anchor="center", pady=2)
+        tk.Label(row_frame, text=f"Choix {idx+1} :", font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"]).pack(side="left", padx=5)
+        entry = tk.Entry(row_frame, font=("Arial", 12), width=45)
+        entry.pack(side="left", padx=5)
+        self.entries_choices.append(entry)
 
     def setup_mqtt(self):
         self.client = mqtt.Client()
@@ -176,6 +282,36 @@ class GestionnaireQuiz:
         # Publier le classement sur un topic MQTT
         self.client.publish("quiz/classement", json.dumps(leaderboard))
 
+    def add_custom_question(self):
+        nb_max = self.nb_questions.get()
+        if len(self.custom_questions) >= nb_max:
+            messagebox.showwarning(
+                "Limite atteinte",
+                f"Tu as déjà créé {nb_max} questions personnalisées.\n"
+                "Augmente le nombre de questions si tu veux en ajouter d'autres."
+            )
+            return
+
+        qtext = self.entry_new_question.get().strip()
+        choices = [entry.get().strip() for entry in self.entries_choices if entry.get().strip()]
+        correct = self.correct_choice.get()
+
+        if not qtext or len(choices) < 2 or correct >= len(choices) or correct < 0:
+            messagebox.showerror("Erreur", "Il faut au moins 2 choix, et l'index de la bonne réponse doit être correct.")
+            return
+
+        question = {
+            "question": qtext,
+            "options": choices,
+            "answer": correct
+        }
+        self.custom_questions.append(question)
+        messagebox.showinfo("✅", f"Question ajoutée ({len(self.custom_questions)}/{nb_max}) !")
+        self.entry_new_question.delete(0, tk.END)
+        for entry in self.entries_choices:
+            entry.delete(0, tk.END)
+        self.correct_choice.set(0)
+        self.init_choices(2)
 
 
     def start_quiz(self):
@@ -183,12 +319,28 @@ class GestionnaireQuiz:
             messagebox.showwarning("Avertissement", "Aucun joueur connecté.")
             return
 
+        mode = self.mode_selection.get()
         nb = self.nb_questions.get()
-        if nb <= 0 or nb > len(all_questions):
-            messagebox.showerror("Erreur", f"Nombre de questions invalide (max {len(all_questions)})")
+        timer = self.timer_duration.get()
+
+        if timer <= 0 or timer > 60:
+            messagebox.showerror("Erreur", "Le temps doit être compris entre 1 et 60 secondes.")
             return
 
-        self.questions = random.sample(all_questions, nb)
+        questions = []
+
+        if mode == "Classiques":
+            if len(all_questions) < nb:
+                messagebox.showerror("Erreur", "Pas assez de questions classiques.")
+                return
+            questions = random.sample(all_questions, nb)
+        elif mode == "Personnalisées":
+            if len(self.custom_questions) < nb:
+                messagebox.showerror("Erreur", "Pas assez de questions personnalisées.")
+                return
+            questions = random.sample(self.custom_questions, nb)
+
+        self.questions = questions
         self.btn_start.config(state="disabled")
         self.started = True
         threading.Thread(target=self.run_quiz, daemon=True).start()
