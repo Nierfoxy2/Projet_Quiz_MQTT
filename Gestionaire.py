@@ -330,11 +330,17 @@ class GestionnaireQuiz:
         questions = []
 
         if mode == "Classiques":
+            if nb < 1 or nb > 20:
+                messagebox.showerror("Erreur", "Le nombre de questions classiques doit être compris entre 1 et 20.")
+                return
             if len(all_questions) < nb:
                 messagebox.showerror("Erreur", "Pas assez de questions classiques.")
                 return
             questions = random.sample(all_questions, nb)
         elif mode == "Personnalisées":
+            if nb < 1 :
+                messagebox.showerror("Erreur", "Le nombre de questions personnalisées doit être au moins 1.")
+                return
             if len(self.custom_questions) < nb:
                 messagebox.showerror("Erreur", "Pas assez de questions personnalisées.")
                 return
@@ -368,7 +374,7 @@ class GestionnaireQuiz:
                     "correct_answer": correct_index
                 }))
             self.update_scoreboard()
-            time.sleep(2)
+            time.sleep(4)
         self.finish_quiz()
 
 

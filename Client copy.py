@@ -71,9 +71,8 @@ class ClientQuiz:
 
         self.leaderboard_frame = tk.Frame(master, bg=NORD["bg"])
         self.leaderboard_frame.pack(fill="both", expand=True, pady=10)
-
-        self.leaderboard_list = tk.Listbox(self.leaderboard_frame, font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"], justify="center")
-        self.leaderboard_list.pack(fill="both", expand=True, anchor="center")
+        self.leaderboard_list = tk.Listbox(self.leaderboard_frame, font=("Arial", 12), bg=NORD["bg"], fg=NORD["fg"])
+        self.leaderboard_list.pack(fill="both", expand=True)
 
         self.client.subscribe("quiz/classement")
 
